@@ -1049,6 +1049,18 @@ EOF'
 # This function sets the description of the container.
 description() {
   IP=$(pct exec "$CTID" ip a s dev eth0 | awk '/inet / {print $2}' | cut -d/ -f1)
+  
+  # Generate web link HTML if $WEB is not empty
+  WEB_LINK=""
+  if [ -n "$WEB" ]; then
+    WEB_LINK=$(cat <<EOF
+  <span style='margin: 0 10px;'>
+    <i class="fa fa-globe fa-fw" style="color: #f5f5f5;"></i>
+    <a href='$WEB' target='_blank' rel='noopener noreferrer' style='text-decoration: none; color: #00617f;'>Dashboard</a>
+  </span>
+EOF
+)
+  fi
 
   # Generate LXC Description
   DESCRIPTION=$(cat <<EOF
@@ -1065,6 +1077,7 @@ description() {
     </a>
   </p>
   
+  ${WEB_LINK}
   <span style='margin: 0 10px;'>
     <i class="fa fa-github fa-fw" style="color: #f5f5f5;"></i>
     <a href='https://github.com/community-scripts/ProxmoxVE' target='_blank' rel='noopener noreferrer' style='text-decoration: none; color: #00617f;'>GitHub</a>
@@ -1083,6 +1096,7 @@ EOF
 
   # Set Description in LXC
   pct set "$CTID" -description "$DESCRIPTION"
+
 
   if [[ -f /etc/systemd/system/ping-instances.service ]]; then
     systemctl start ping-instances.service
